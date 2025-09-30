@@ -6,8 +6,6 @@
 #include "../include/stego_lsb.h"
 #include "../include/bmp.h"
 
-// steg_lsb decode | encode
-
 void print_help(const char *progname);
 
 int main(int argc, char **argv) {
@@ -55,21 +53,22 @@ int main(int argc, char **argv) {
     mode = argv[optind];
 
     BitStream bs;
-    BMPImage *img = NULL;
+    BMPImage img;
+    Message msg;
 
     if (strcmp(mode, "encode") == 0) {
         if (!input || !output || (!msg_str && !msg_file)) {
-            LOG_ERROR("encode requires -i <input.bmp> -o <output.bmp> -m <\"message\"> | --msg-file <message.txt> ");
+            LOG_ERROR("encode requires -i <input.bmp> -o <output.bmp> -m <\"message\"> | --msg-file <message.txt> \n\n");
             print_help(argv[0]);
             return 1;
         }
 
-        char *msg_data = NULL;
-        uint32_t msg_size = 0;
+        msg.data = NULL;
+        msg.data_size = 0;
 
         if (NULL != msg_str){
-            msg_data = msg_str;
-            msg_size = strlen(msg_str);
+            msg.data = msg_str;
+            msg.data_size = strlen(msg_str);
         } else if (NULL != msg_file){
 
             FILE *mf = fopen(msg_file, "rb");
@@ -78,22 +77,22 @@ int main(int argc, char **argv) {
                 return 1;
             }
             fseek(mf, 0, SEEK_END);
-            msg_size = ftell(mf);
+            msg.data_size = ftell(mf);
             fseek(mf, 0, SEEK_SET);
 
-            msg_data = malloc(msg_size);
-            if(NULL == msg_data) {
+            msg.data = malloc(msg.data_size);
+            if(NULL == msg.data) {
                 LOG_ERROR("occurs while allocating memory for msg_data");
                 fclose(mf);
                 return 1;
             }
 
-            fread(msg_data, 1, msg_size, mf);
+            fread(msg.data, 1, msg.data_size, mf);
             fclose(mf);
         }
 
         printf("Encoding message (%zu bytes) into %s → %s\n",
-               msg_size, input, output);
+               msg.data_size, input, output);
 
         ERRStatus status = bmp_load(input, &img);
 
@@ -106,9 +105,9 @@ int main(int argc, char **argv) {
             case OK_STATUS: LOG_INFO("got a OK_STATUS from bmp_load()");
         }
 
-        bs_init(&bs, img->pixels, img->data_size);
+        bs_init(&bs, img.pixels, img.data_size);
 
-        status = encode_classic(&bs, msg_data, msg_size);
+        status = encode_classic(&bs, &msg);
 
         switch( status ) {
             case MEMORY_ERR: return 3;
@@ -126,7 +125,48 @@ int main(int argc, char **argv) {
             case OK_STATUS: LOG_INFO("got a OK_STATUS from bmp_save()");
         }
 
+// ------------ decode -------------------------------
+
     } else if (strcmp(mode, "decode") == 0) {
+        if( !input || !output ){
+            LOG_ERROR("decode requires -i <input.bmp> -o <output.bmp> \n\n");
+            print_help(argv[0]);
+            return 1;
+        }
+
+        msg.data = NULL;
+        msg.data_size = 0;
+
+        ERRStatus status = bmp_load(input, &img);
+
+        switch(status){
+            case ERR_FILE_NOT_FOUND: LOG_ERROR("there is no file with that name. quitting ... "); return 2;
+            case MEMORY_ERR: LOG_ERROR("there are some issues with memory allocation. quitting ..."); return 3;
+            case IO_ERROR: LOG_ERROR("there are some issues with reading file. quitting ... "); return 4;
+            case ERR_INVALID_FORMAT: LOG_ERROR("invalid file format. please check BPP and COMPRESSION. quitting ... "); return 5;
+
+            case OK_STATUS: LOG_INFO("got a OK_STATUS from bmp_load()");
+        }
+
+        bs_init(&bs, img.pixels, img.data_size);
+
+        status = decode_classic(&bs, &msg);
+
+        switch( status ) {
+            case MEMORY_ERR: return 3;
+
+            case OK_STATUS: LOG_INFO("got a OK_STATUS from decode_classic()");
+        }
+
+        FILE *f = fopen(output, "w");
+        if(NULL == f) {
+            LOG_ERROR("there is no file with that name. quitting ... ");
+            return 2;
+        }
+
+        fprintf(f, msg.data);
+
+        fclose(f);
 
     }
     return 0;

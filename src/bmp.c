@@ -6,15 +6,12 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "MemoryLeak"
 
-ERRStatus bmp_load(const char *filename, BMPImage **img){
+ERRStatus bmp_load(const char *filename, BMPImage *img){
     FILE *f = fopen(filename, "rb");
     if( !f) return ERR_FILE_NOT_FOUND;
 
-    (*img) = malloc(sizeof(BMPImage));
-    if(!(*img)) return MEMORY_ERR;
-
     // читаем заголовкоув
-    if(fread(&(*img)->bheader, sizeof(BMPHeader), 1, f) != 1){
+    if(fread(&img->bheader, sizeof(BMPHeader), 1, f) != 1){
         if(feof(f)) {
             LOG_ERROR("Unexpected end of file");
             return ERR_INVALID_FORMAT;
@@ -23,24 +20,24 @@ ERRStatus bmp_load(const char *filename, BMPImage **img){
         fclose(f);
         return IO_ERROR;
     }
-    if(fread(&(*img)->dheader, sizeof(DIBHeader), 1, f) != 1){
+    if(fread(&img->dheader, sizeof(DIBHeader), 1, f) != 1){
         if(feof(f)) LOG_ERROR("Unexpected end of file");
         else if(ferror(f)) LOG_ERROR("Reading file failure");
         fclose(f);
         return IO_ERROR;
     }
 
-    if((*img)->dheader.biBitCount != 24) return ERR_INVALID_FORMAT;
-    if((*img)->dheader.biCompression != 0) return ERR_INVALID_FORMAT;
+    if(img->dheader.biBitCount != 24) return ERR_INVALID_FORMAT;
+    if(img->dheader.biCompression != 0) return ERR_INVALID_FORMAT;
 
     //вычисления размера массива пикселей с учетом пагинации до 4 байт ( DWORD )
-    (*img)->row_size = (((*img)->dheader.biBitCount * (*img)->dheader.biWidth + 31) / 32 ) * 4;
-    (*img)->data_size = (*img)->row_size * abs((*img)->dheader.biHeight);
-    (*img)->pixels = malloc((*img)->data_size);
-    if(!(*img)->pixels) return MEMORY_ERR;
+    img->row_size = ((img->dheader.biBitCount * img->dheader.biWidth + 31) / 32 ) * 4;
+    img->data_size = img->row_size * abs(img->dheader.biHeight);
+    img->pixels = malloc(img->data_size);
+    if(!img->pixels) return MEMORY_ERR;
 
-    fseek(f, (*img)->bheader.bfOffBits, SEEK_SET);
-    if(fread((*img)->pixels,1, (*img)->data_size, f) != (*img)->data_size){
+    fseek(f, img->bheader.bfOffBits, SEEK_SET);
+    if(fread(img->pixels,1, img->data_size, f) != img->data_size){
         if(feof(f)) LOG_ERROR("Unexpected end of file");
         else if(ferror(f)) LOG_ERROR("Reading file failure");
         fclose(f);
@@ -52,8 +49,8 @@ ERRStatus bmp_load(const char *filename, BMPImage **img){
 }
 #pragma clang diagnostic pop
 
-ERRStatus bmp_save(const char *filename, BMPImage **img){
-    if(!(*img)) {
+ERRStatus bmp_save(const char *filename, BMPImage *img){
+    if(!img) {
         LOG_ERROR("img pointer is NULL");
         return MEMORY_ERR;
     }
@@ -64,21 +61,21 @@ ERRStatus bmp_save(const char *filename, BMPImage **img){
         return ERR_FILE_NOT_FOUND;
     }
 
-    if (fwrite(&(*img)->bheader, sizeof(BMPHeader), 1, f) != 1){
+    if (fwrite(&img->bheader, sizeof(BMPHeader), 1, f) != 1){
         LOG_ERROR("writing file failure");
         fclose(f);
         return IO_ERROR;
     }
 
-    if (fwrite(&(*img)->dheader, sizeof(DIBHeader), 1, f) != 1){
+    if (fwrite(&img->dheader, sizeof(DIBHeader), 1, f) != 1){
         LOG_ERROR("writing file failure");
         fclose(f);
         return IO_ERROR;
     }
 
-    uint32_t wrote_bytes = fwrite((*img)->pixels, 1, (*img)->data_size, f);
+    uint32_t wrote_bytes = fwrite(img->pixels, 1, img->data_size, f);
 
-    if ( wrote_bytes != (*img)->data_size ){
+    if ( wrote_bytes != img->data_size ){
         LOG_ERROR("writing file failure");
         fclose(f);
         return IO_ERROR;

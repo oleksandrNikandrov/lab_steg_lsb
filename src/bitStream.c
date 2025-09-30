@@ -20,7 +20,7 @@ void bs_put_bit(BitStream *bs, uint8_t bit){
 uint8_t bs_get_bit(BitStream *bs){
     if (bs->current_bit >= bs->total_bits) return 0;
     uint32_t byte_index = bs->current_bit;
-    uint8_t bit = (*bs->pixels + byte_index) & 1;
+    uint8_t bit = *(bs->pixels + byte_index) & 1;
     bs->current_bit++;
     return bit;
 }

@@ -39,8 +39,8 @@ typedef struct {
     int32_t data_size;
 } BMPImage;
 
-ERRStatus bmp_load(const char *filename, BMPImage **img);
-ERRStatus bmp_save(const char *filename, BMPImage **img);
+ERRStatus bmp_load(const char *filename, BMPImage *img);
+ERRStatus bmp_save(const char *filename, BMPImage *img);
 
 ERRStatus bmp_free(BMPImage *img);
 

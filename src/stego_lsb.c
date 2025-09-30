@@ -44,8 +44,6 @@ ERRStatus decode_classic(BitStream *bs, uint8_t *data){
         data_size |= (bs_get_bit(bs) << i);
     }
 
-    //printf("data_size: %u", data_size);
-
     for(uint32_t i = 0; i < data_size; i++){
         uint8_t byte = 0;
         for(int8_t j = 7; j >= 0; j--){

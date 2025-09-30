@@ -12,6 +12,7 @@ ERRStatus bmp_load(const char *filename, BMPImage **img){
 
     (*img) = malloc(sizeof(BMPImage));
     if(!(*img)) return MEMORY_ERR;
+
     // читаем заголовкоув
     if(fread(&(*img)->bheader, sizeof(BMPHeader), 1, f) != 1){
         if(feof(f)) {

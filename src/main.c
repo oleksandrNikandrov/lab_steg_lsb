@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
             case IO_ERROR: LOG_ERROR("there are some issues with reading file. quitting ... "); return 4;
             case ERR_INVALID_FORMAT: LOG_ERROR("invalid file format. please check BPP and COMPRESSION. quitting ... "); return 5;
 
-            case OK_STATUS: LOG_ERROR("got a OK_STATUS from bmp_load()");
+            case OK_STATUS: LOG_INFO("got a OK_STATUS from bmp_load()");
         }
 
         bs_init(&bs, img->pixels, img->data_size);
@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
         switch( status ) {
             case MEMORY_ERR: return 3;
 
-            case OK_STATUS: LOG_ERROR("got a OK_STATUS from encode_classic()");
+            case OK_STATUS: LOG_INFO("got a OK_STATUS from encode_classic()");
         }
 
         status = bmp_save(output, &img);
@@ -123,8 +123,10 @@ int main(int argc, char **argv) {
             case ERR_FILE_NOT_FOUND: LOG_ERROR("there is no file with that name. quitting ... "); return 2;
             case IO_ERROR: LOG_ERROR("there are some issues with writing file. quitting ... "); return 4;
 
-            case OK_STATUS: LOG_ERROR("got a OK_STATUS from bmp_save()");
+            case OK_STATUS: LOG_INFO("got a OK_STATUS from bmp_save()");
         }
+
+    } else if (strcmp(mode, "decode") == 0) {
 
     }
     return 0;

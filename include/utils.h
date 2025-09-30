@@ -4,6 +4,9 @@
 #define LOG_ERROR(msg) \
     fprintf(stderr, "[%s:%d] ERROR: %s\n", __FILE__, __LINE__, msg)
 
+#define LOG_INFO(msg) \
+    fprintf(stderr, "[%s:%d] INFO: %s\n", __FILE__, __LINE__, msg)
+
 typedef enum{
     OK_STATUS = 0,
     ERR_FILE_NOT_FOUND,

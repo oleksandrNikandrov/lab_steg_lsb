@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     BMPImage *img = NULL;
 
     if (strcmp(mode, "encode") == 0) {
-        if (!input || !output || (!msg_str || !msg_file)) {
+        if (!input || !output || (!msg_str && !msg_file)) {
             LOG_ERROR("encode requires -i <input.bmp> -o <output.bmp> -m <\"message\"> | --msg-file <message.txt> ");
             print_help(argv[0]);
             return 1;
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
         printf("Encoding message (%zu bytes) into %s → %s\n",
                msg_size, input, output);
 
-        ERRStatus status = bmp_load(input, img);
+        ERRStatus status = bmp_load(input, &img);
 
         switch(status){
             case ERR_FILE_NOT_FOUND: LOG_ERROR("there is no file with that name. quitting ... "); return 2;
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
             case OK_STATUS: LOG_ERROR("got a OK_STATUS from encode_classic()");
         }
 
-        status = bmp_save(output, img);
+        status = bmp_save(output, &img);
 
         switch( status ) {
             case MEMORY_ERR: LOG_ERROR("there are some issues with memory allocation. quitting ..."); return 3;

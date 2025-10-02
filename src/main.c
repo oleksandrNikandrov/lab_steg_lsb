@@ -3,60 +3,34 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../include/stego_lsb.h"
-#include "util/bmp.h"
+#include "../include/stego_lsb.h" // for BMPImage
+#include "util/common.h" // for Option struct
+#include "cli/alg_handlers.h"
 
 void print_help(const char *progname);
+ERRStatus parse_args(int32_t argc, char **argv, Options *opts);
 
 int main(int argc, char **argv) {
-    char *input = NULL;
-    char *output = NULL;
-    char *msg_str = NULL;
-    char *msg_file = NULL;
-    char *mode = NULL;
+    StegoContext ctx;
 
-    int opt;
-    int long_index = 0;
+    ERRStatus status = parse_args(argc, argv, &(ctx.opts));
 
-    static struct option long_options[] = {
-            {"help", no_argument, 0, 'h'},
-            {"input", required_argument, 0, 'i'},
-            {"output", required_argument, 0, 'o'},
-            {"msg-file", required_argument, 0, 0},
-            {0, 0, 0, 0}
-    };
+    switch( status ){
+        case ERR_MISSING_MODE_OR_ALG: LOG_ERROR("missing <algorithm> and/or <mode> (expected: <algorithm> <mode>)"); return 6;
+        case 1: print_help(argv[0]); return 0;
+        case -1: print_help(argv[0]); return -1;
 
-    while ((opt = getopt_long(argc, argv, "i:o:m:h", long_options, &long_index)) != -1) {
-        switch ( opt ) {
-            case 'i': input = optarg; break;
-            case 'o': output = optarg; break;
-            case 'm': msg_str = optarg; break;
-            case 'h': print_help(argv[0]); return 0;
+        case OK_STATUS: LOG_INFO("got a OK_STATUS from parse_args()");
+    }
 
-            case 0:
-                if (strcmp(long_options[long_index].name, "msg-file") == 0) {
-                    msg_file = optarg;
-                }
-                break;
-            default:
-                print_help(argv[0]);
-                return 1;
+    for(uint8_t i = 0; handlers[i].name; i++){
+        if(strcmp(handlers[i].name, ctx.opts.alg) == 0){
+            handlers[i].handler(&ctx);
         }
     }
 
-    if (optind >= argc) {
-        LOG_ERROR("missing mode (encode/decode) ");
-        print_help(argv[0]);
-        return 1;
-    }
 
-    mode = argv[optind];
-
-    BitStream bs;
-    BMPImage img;
-    Message msg;
-
-    if (strcmp(mode, "encode") == 0) {
+    if (strcmp(opts.mode, "encode") == 0) {
         if (!input || !output || (!msg_str && !msg_file)) {
             LOG_ERROR("encode requires -i <input.bmp> -o <output.bmp> -m <\"message\"> | --msg-file <message.txt> \n\n");
             print_help(argv[0]);
@@ -94,7 +68,7 @@ int main(int argc, char **argv) {
         printf("Encoding message (%zu bytes) into %s → %s\n",
                msg.data_size, input, output);
 
-        ERRStatus status = bmp_load(input, &img);
+        status = bmp_load(input, &img);
 
         switch( status ){
             case ERR_FILE_NOT_FOUND: LOG_ERROR("there is no file with that name. quitting ... "); return 2;
@@ -171,11 +145,46 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+ERRStatus parse_args(int32_t argc, char **argv, Options *opts){
+    int opt, long_index = 0;
+
+    static struct option long_options[] = {
+            {"help", no_argument, 0, 'h'},
+            {"input", required_argument, 0, 'i'},
+            {"output", required_argument, 0, 'o'},
+            {"msg-file", required_argument, 0, 0},
+            {0, 0, 0, 0}
+    };
+
+    while ((opt = getopt_long(argc, argv, "i:o:m:h", long_options, &long_index)) != -1) {
+        switch ( opt ) {
+            case 'i': opts->input = optarg; break;
+            case 'o': opts->output = optarg; break;
+            case 'm': opts->msg_str = optarg; break;
+            case 'h': return 1; // to print help
+
+            case 0:
+                if (strcmp(long_options[long_index].name, "msg-file") == 0) {
+                    opts->msg_file = optarg;
+                }
+                break;
+            default: return -1;
+        }
+    }
+
+    if (optind + 1 >= argc) return ERR_MISSING_MODE_OR_ALG;
+
+    opts->alg = argv[optind];
+    opts->mode = argv[optind + 1];
+
+    return OK_STATUS;
+}
+
 
 void print_help(const char *progname)
 {
 
-    printf("Usage: %s <mode> [options]\n", progname);
+    printf("Usage: %s <algorithm> <mode> [options]\n", progname);
     printf("\n");
 
     printf("Modes:\n");

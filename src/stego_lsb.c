@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "../include/stego_lsb.h"
+#include "./cli/alg_handlers.h"
 
 ERRStatus encode_classic(BitStream *bs, Message *msg){
     if (NULL == bs){

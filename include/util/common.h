@@ -23,7 +23,8 @@ typedef enum{
     ERR_INVALID_FORMAT,
     MEMORY_ERR,
     IO_ERROR,
-    ERR_MISSING_MODE_OR_ALG
+    ERR_MISSING_MODE_OR_ALG,
+    ERR_INVALID_MODE
 } ERRStatus;
 
 

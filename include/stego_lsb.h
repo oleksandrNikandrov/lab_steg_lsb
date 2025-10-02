@@ -4,14 +4,15 @@
 #include <stdint.h>
 
 #include "util/common.h"
-#include "util/bitStream.h"
+#include "./cli/alg_handlers.h"
+
 
 typedef struct {
     uint8_t *data;
     uint32_t data_size;
 } Message;
 
-ERRStatus encode_classic(BitStream *bs, Message *msg);
-ERRStatus decode_classic(BitStream *bs, Message *msg);
+ERRStatus encode_classic(StegoContext *ctx);
+ERRStatus decode_classic(StegoContext *ctx);
 
 #endif //STEG_LSB_STEGO_LSB_H

@@ -15,8 +15,22 @@ Algorithm handlers[] ={
 
 ERRStatus lsb1_handler(const StegoContext *ctx){
     if (strcmp(ctx->opts.mode, "encode") == 0){
-       encode_classic(ctx);
-
+       return encode_classic(ctx);
+    }
+    else if (strcmp(ctx->opts.mode, "decode") == 0){
+        return decode_classic(ctx);
     }
 
+    return ERR_INVALID_MODE;
+}
+
+ERRStatus lsb2_handler(const StegoContext *ctx){
+    if (strcmp(ctx->opts.mode, "encode") == 0){
+        return encode_classic(ctx);
+    }
+    else if (strcmp(ctx->opts.mode, "decode") == 0){
+        return decode_classic(ctx);
+    }
+
+    return ERR_INVALID_MODE;
 }

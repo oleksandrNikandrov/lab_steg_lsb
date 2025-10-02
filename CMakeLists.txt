@@ -7,4 +7,5 @@ include_directories(include)
 
 file(GLOB SOURCES "src/*.c")
 
-add_executable(steg_lsb ${SOURCES})
+add_executable(steg_lsb ${SOURCES}
+        include/cli/alg_handlers.h)

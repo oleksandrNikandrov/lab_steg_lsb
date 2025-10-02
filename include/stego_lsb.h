@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#include "utils.h"
-#include "bitStream.h"
+#include "util/common.h"
+#include "util/bitStream.h"
 
 typedef struct {
     uint8_t *data;

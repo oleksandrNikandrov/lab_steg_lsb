@@ -3,5 +3,5 @@ cmake-build-*/
 
 *.o
 stego
-lena.bmp
+cmake-build-debug/lena.bmp
 .gitignore

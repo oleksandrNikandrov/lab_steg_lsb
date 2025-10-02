@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "../include/stego_lsb.h"
-#include "../include/bmp.h"
+#include "util/bmp.h"
 
 void print_help(const char *progname);
 
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     };
 
     while ((opt = getopt_long(argc, argv, "i:o:m:h", long_options, &long_index)) != -1) {
-        switch (opt) {
+        switch ( opt ) {
             case 'i': input = optarg; break;
             case 'o': output = optarg; break;
             case 'm': msg_str = optarg; break;
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 
         ERRStatus status = bmp_load(input, &img);
 
-        switch(status){
+        switch( status ){
             case ERR_FILE_NOT_FOUND: LOG_ERROR("there is no file with that name. quitting ... "); return 2;
             case MEMORY_ERR: LOG_ERROR("there are some issues with memory allocation. quitting ..."); return 3;
             case IO_ERROR: LOG_ERROR("there are some issues with reading file. quitting ... "); return 4;
@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
         status = decode_classic(&bs, &msg);
 
         switch( status ) {
-            case MEMORY_ERR: return 3;
+            case MEMORY_ERR: LOG_ERROR("there are some issues with memory allocation. quitting ..."); return 3;
 
             case OK_STATUS: LOG_INFO("got a OK_STATUS from decode_classic()");
         }
@@ -167,7 +167,6 @@ int main(int argc, char **argv) {
         fprintf(f, msg.data);
 
         fclose(f);
-
     }
     return 0;
 }

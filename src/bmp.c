@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../include/bmp.h"
+#include "util/bmp.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "MemoryLeak"

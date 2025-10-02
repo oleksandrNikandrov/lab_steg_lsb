@@ -1,5 +1,5 @@
-#ifndef STEG_LSB_UTILS_H
-#define STEG_LSB_UTILS_H
+#ifndef STEG_LSB_COMMON_H
+#define STEG_LSB_COMMON_H
 
 #define LOG_ERROR(msg) \
     fprintf(stderr, "[%s:%d] ERROR: %s\n", __FILE__, __LINE__, msg)
@@ -16,4 +16,4 @@ typedef enum{
 } ERRStatus;
 
 
-#endif //STEG_LSB_UTILS_H
+#endif //STEG_LSB_COMMON_H

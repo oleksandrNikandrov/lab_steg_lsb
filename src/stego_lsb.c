@@ -43,7 +43,7 @@ ERRStatus decode_classic(BitStream *bs, Message *msg){
         msg->data_size |= (bs_get_bit(bs) << i);
     }
 
-    msg->data = malloc(sizeof(msg->data_size));
+    msg->data = malloc(sizeof(msg->data_size + 1)); // \0
     if(!msg->data) {
         LOG_ERROR("occured while allocating memory. ");
         return MEMORY_ERR;
@@ -56,6 +56,8 @@ ERRStatus decode_classic(BitStream *bs, Message *msg){
         }
         *(msg->data + i) = byte;
     }
+
+    msg->data[msg->data_size] = '\0';
 
     return OK_STATUS;
 }

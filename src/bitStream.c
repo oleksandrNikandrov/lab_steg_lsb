@@ -1,6 +1,4 @@
-#include <stdlib.h>
-
-#include "../include/bitStream.h"
+#include "util/bitStream.h"
 
 void bs_init(BitStream *bs, uint8_t *pixels, uint32_t total_bits){
     if(pixels == NULL) return;
